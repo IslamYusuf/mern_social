@@ -4,7 +4,7 @@ import {
     ListItem, ListItemAvatar, ListItemSecondaryAction,
     ListItemText, makeStyles, Paper, Typography, 
 } from '@material-ui/core'
-import { Edit, Person } from '@material-ui/icons'
+import { Edit} from '@material-ui/icons'
 import { Link, useNavigate, useParams, useLocation } from 'react-router-dom'
 
 import {read} from './api-user'
@@ -24,6 +24,10 @@ export default function Profile() {
     const {pathname} = useLocation()
     const navigate = useNavigate()
     const [user, setUser] = useState({})
+
+    const photoUrl = user._id
+        ? `/api/users/photo/${user._id}?${new Date().getTime()}`
+        : '/api/users/defaultphoto'
     
     useEffect(() => {
         const abortController = new AbortController()
@@ -31,9 +35,7 @@ export default function Profile() {
         
         const jwt = auth.isAuthenticated()
         
-        read({
-            userId: userId
-        }, {t: jwt.token}, signal).then((data) => {
+        read({userId}, {t: jwt.token}, signal).then((data) => {
             if (data && data.error) {
                 navigate('/signin', {state: {from : {pathname}}, replace:true})
             } else {
@@ -54,7 +56,7 @@ export default function Profile() {
             <List dense>
                 <ListItem>
                     <ListItemAvatar>
-                        <Avatar><Person/></Avatar>
+                        <Avatar src={photoUrl} />
                     </ListItemAvatar>
                     <ListItemText primary={user.name} secondary={user.email}/>
                     { auth.isAuthenticated().user && auth.isAuthenticated().user._id == user._id &&
@@ -68,6 +70,7 @@ export default function Profile() {
                         </ListItemSecondaryAction>)
                     }
                 </ListItem>
+                <ListItem> <ListItemText primary={user.about}/> </ListItem>
                 <Divider/>
                 <ListItem>
                     <ListItemText primary={"Joined: " + (

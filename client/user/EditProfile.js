@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from 'react'
 import { 
     Button, Card, CardActions, CardContent, 
-    Icon, TextField, Typography, makeStyles
+    Icon, TextField, Typography, makeStyles,
 } from "@material-ui/core"
+import {CloudUploadRounded} from "@material-ui/icons"
 import {useNavigate, useParams, useLocation} from 'react-router-dom' 
 
 import {read, update} from './api-user'
@@ -21,11 +22,9 @@ export default function EditProfile() {
     const {pathname} = useLocation()
     const navigate = useNavigate()
     const [user, setUser] = useState({
-        name: '',
-        password: '',
-        email: '',
-        error: '',
-        redirectToProfile: false
+        name: '', about:'',
+        password: '', email: '', photo: '',
+        error: '', redirectToProfile: false
     })
     
     useEffect(() => {
@@ -35,13 +34,11 @@ export default function EditProfile() {
         const jwt = auth.isAuthenticated()
         
         if(!user.name && !user.email){
-            read({
-                userId: userId
-            }, {t: jwt.token}, signal).then((data) => {
+            read({userId}, {t: jwt.token}, signal).then((data) => {
                 if (data && data.error) {
                     navigate('/signin', {state: {from : {pathname}}})
                 } else {
-                    setUser({...user, ...data})
+                    setUser({...user, ...data, photo: undefined})
                 }
             })
         }
@@ -56,21 +53,23 @@ export default function EditProfile() {
     }, [userId, user.redirectToProfile])
 
     const handleChange = name => event => {
-        setUser({ ...user, [name]: event.target.value })
+        const value = name === 'photo'
+            ? event.target.files[0]
+            : event.target.value
+        setUser({ ...user, [name]: value })
     }
 
     const clickSubmit = () => {
         const jwt = auth.isAuthenticated()
-        const updatedUser = {
-            name: user.name || undefined,
-            email: user.email || undefined,
-            password: user.password || undefined
-        }
-        update({
-                userId: userId
-            }, {
-                t: jwt.token
-        }, updatedUser).then((data) => {
+        let userData = new FormData()
+
+        user.name && userData.append('name', user.name)
+        user.email && userData.append('email', user.email)
+        user.password && userData.append('password', user.password)
+        user.about && userData.append('about', user.about)
+        user.photo && userData.append('photo', user.photo)
+
+        update({userId}, {t: jwt.token}, userData).then((data) => {
             if (data && data.error) {
                 setUser({...user, error: data.error})
             } else {
@@ -91,6 +90,15 @@ export default function EditProfile() {
                         value={user.name} onChange={handleChange('name')}
                         margin="normal"/>
                     <br/>
+                    <TextField
+                        id="multiline-flexible"
+                        label="About"
+                        multiline
+                        rows="2"
+                        value={user.about}
+                        onChange={handleChange('about')}
+                    />
+                    <br/>
                     <TextField id="email" type="email" label="Email"
                         className={classes.textField}
                         value={user.email} onChange={handleChange('email')}
@@ -100,6 +108,18 @@ export default function EditProfile() {
                         className={classes.textField} value={user.password}
                         onChange={handleChange('password')} margin="normal"/>
                     <br/>
+                    <input accept="image/*" type="file"
+                        onChange={handleChange('photo')}
+                        style={{display:'none'}}
+                        id="icon-button-file" />
+                    <label htmlFor="icon-button-file">
+                        <Button variant="contained" color="default" component="span">
+                            Upload <CloudUploadRounded/>
+                        </Button>
+                    </label>
+                    <span className={classes.filename}>
+                        {user.photo ? user.photo.name : ''}
+                    </span>
                     {
                         user.error && (
                             <Typography component="p" color="error">
