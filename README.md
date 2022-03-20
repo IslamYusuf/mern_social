@@ -1,1 +1,1 @@
-# mern_skeleton_app
+# mern_social_media_app
