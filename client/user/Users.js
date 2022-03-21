@@ -5,7 +5,7 @@ import {
     Avatar, IconButton, List, ListItemAvatar, ListItem, 
     ListItemSecondaryAction, ListItemText, Paper, Typography 
 } from '@material-ui/core'
-import { ArrowForward, Person } from '@material-ui/icons'
+import { ArrowForward } from '@material-ui/icons'
 
 import {list} from "./api-user"
 
@@ -41,15 +41,13 @@ const Users = () => {
                     All Users
                 </Typography>
                 <List dense>
-                    {users.map((item, i) => {
-                        return <Link to={`/user/${item._id}`} key={i}>
+                    {users.map((user, i) => {
+                        return <Link to={`/user/${user._id}`} key={i}>
                             <ListItem button>
                                 <ListItemAvatar>
-                                    <Avatar>
-                                        <Person/>
-                                    </Avatar>
+                                    <Avatar src={`/api/users/photo/${user._id}?${new Date().getTime()}`} />
                                 </ListItemAvatar>
-                                <ListItemText primary={item.name}/>
+                                <ListItemText primary={user.name}/>
                                 <ListItemSecondaryAction>
                                     <IconButton>
                                         <ArrowForward/>

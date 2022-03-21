@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import {Card,CardContent,CardMedia,Typography} from '@material-ui/core'
 
 import unicornbikeImg from './../assets/images/unicornbike.jpg'
+import FindPeople from '../user/FindPeople'
+import auth from '../auth/auth-helper'
 
 const useStyles = makeStyles(theme => ({
     card: {
@@ -21,6 +23,14 @@ const useStyles = makeStyles(theme => ({
 
 export default function Home(){
     const classes = useStyles()
+    const [userLoggedIn, setUserLoggedIn] = useState(false)
+
+    useEffect(()=>{
+        const jwt = auth.isAuthenticated()
+
+        if(jwt) setUserLoggedIn(true)
+    },[])
+
     return (
         <Card className={classes.card}>
             <Typography variant="h6" className={classes.title}>
@@ -29,9 +39,13 @@ export default function Home(){
             <CardMedia className={classes.media}
                 image={unicornbikeImg} title="Unicorn Bicycle"/>
             <CardContent>
-                <Typography variant="body2" component="p">
-                    Welcome to the MERN Skeleton home page.
-                </Typography>
+                {userLoggedIn ? (<FindPeople/>) 
+                    : (
+                        <Typography variant="body2" component="p">
+                            Welcome to MERN_Social. Signin to start Following People.
+                        </Typography>
+                    )
+                }
             </CardContent>
         </Card>
 )}
