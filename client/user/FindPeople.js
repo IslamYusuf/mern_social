@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { 
-    Avatar, Button, IconButton, List, ListItem, ListItemAvatar, 
-    ListItemSecondaryAction, ListItemText, makeStyles, Snackbar, 
+    Avatar, Button, IconButton, List, ListItem, ListItemAvatar, Typography,
+    ListItemSecondaryAction, ListItemText, makeStyles, Paper, Snackbar, 
 } from '@material-ui/core'
 import { Visibility } from '@material-ui/icons'
 import { Link } from 'react-router-dom'
@@ -63,7 +63,11 @@ const FindPeople = () => {
     }, [])
 
     return (
-        <List>
+        <Paper className={classes.root} elevation={4}>
+            <Typography type="title" className={classes.title}>
+            Who to follow
+            </Typography>
+            <List>
             {users.map((user, i) => {
                 return <span key={i}>
                     <ListItem>
@@ -96,6 +100,7 @@ const FindPeople = () => {
                 message={<span className={classes.snack}>{successMsg.followMessage}</span>}
             />
         </List>
+        </Paper>
     )
 }
 

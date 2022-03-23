@@ -8,6 +8,7 @@ import { Edit} from '@material-ui/icons'
 import { Link, useNavigate, useParams, useLocation } from 'react-router-dom'
 
 import {read} from './api-user'
+import {listByUser} from './../post/api-post'
 import auth from '../auth/auth-helper'
 import DeleteUser from './DeleteUser'
 import FollowProfileButton from './FollowProfileButton'
@@ -25,15 +26,30 @@ export default function Profile() {
     const {userId} = useParams()
     const {pathname} = useLocation()
     const navigate = useNavigate()
-    const [user, setUser] = useState({isFollowed: false})
+    const [user, setUser] = useState({isFollowed: false,})
+    const [posts, setPosts] = useState([])
 
     const photoUrl = user._id
         ? `/api/users/photo/${user._id}?${new Date().getTime()}`
         : '/api/users/defaultphoto'
     
-    const clickFollowButton = (callApi) => {
-        const jwt = auth.isAuthenticated()
+    const jwt = auth.isAuthenticated()
+    
+    const checkFollow = (user) => {
+        const match = user.followers.some((follower)=> {
+            return follower._id == jwt.user._id
+        })
+        return match
+    }
 
+    const removePost = (post) => {
+        const updatedPosts = posts
+        const index = updatedPosts.indexOf(post)
+        updatedPosts.splice(index, 1)
+        setPosts(updatedPosts)
+    }
+    
+    const clickFollowButton = (callApi) => {
         callApi({userId: jwt.user._id},{t: jwt.token}, user._id)
         .then((data) => {
             if (data.error) {
@@ -44,17 +60,20 @@ export default function Profile() {
         })
     }
 
+    const loadPosts = (user) => {
+        listByUser({userId: user}, {t: jwt.token})
+        .then((data) => {
+            if (data.error) {
+                console.log(data.error)
+            } else {
+                setPosts(data)
+            }
+        })
+    }
+
     useEffect(() => {
         const abortController = new AbortController()
         const signal = abortController.signal
-        
-        const jwt = auth.isAuthenticated()
-        const checkFollow = (user) => {
-            const match = user.followers.some((follower)=> {
-                return follower._id == jwt.user._id
-            })
-            return match
-        }
 
         read({userId}, {t: jwt.token}, signal).then((data) => {
             if (data && data.error) {
@@ -62,6 +81,7 @@ export default function Profile() {
             } else {
                 const isFollowed = checkFollow(data)
                 setUser({...data, isFollowed })
+                loadPosts(data._id)
             }
         })
         
@@ -100,7 +120,7 @@ export default function Profile() {
                     /> 
                 </ListItem>
                 <Divider/>
-                <ProfileTabs following={user.following} followers={user.followers}/>
+                <ProfileTabs following={user.following} followers={user.followers} posts={posts} removePostUpdate={removePost}/>
             </List>
         </Paper>
     )

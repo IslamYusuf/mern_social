@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {AppBar, Typography, Tabs, Tab} from '@material-ui/core'
 
 import FollowGrid from './../user/FollowGrid'
-//import PostList from './../post/PostList'
+import PostList from './../post/PostList'
 
 const TabContainer = ({children}) => {
     return (
@@ -13,8 +13,8 @@ const TabContainer = ({children}) => {
     )
 }
 
-export default function ProfileTabs ( {following, followers} ){
-  const [tab, setTab] = useState(1)
+export default function ProfileTabs ( {following, followers ,removePostUpdate, posts} ){
+  const [tab, setTab] = useState(0)
 
   const handleTabChange = (event, value) => {
     setTab(value)
@@ -35,7 +35,7 @@ export default function ProfileTabs ( {following, followers} ){
             <Tab label="Followers" />
           </Tabs>
         </AppBar>
-       {/* {tab === 0 && <TabContainer><PostList removeUpdate={props.removePostUpdate} posts={props.posts}/></TabContainer>} */}
+       {tab === 0 && <TabContainer><PostList removeUpdate={removePostUpdate} posts={posts}/></TabContainer>}
        {tab === 1 && <TabContainer><FollowGrid people={following}/></TabContainer>}
        {tab === 2 && <TabContainer><FollowGrid people={followers}/></TabContainer>}
     </div>)
@@ -45,8 +45,8 @@ export default function ProfileTabs ( {following, followers} ){
 ProfileTabs.propTypes = {
   following: PropTypes.array.isRequired,
   followers: PropTypes.array.isRequired,
-  //removePostUpdate: PropTypes.func.isRequired,
-  //posts: PropTypes.array.isRequired
+  removePostUpdate: PropTypes.func.isRequired,
+  posts: PropTypes.array.isRequired
 }
 
 TabContainer.propTypes = {
